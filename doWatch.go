@@ -63,8 +63,8 @@ import (
 func doWatch(contractName, eventName string) (err error) {
 
 	if ABIx, ok := gCfg.ContractList[contractName]; ok { // check that it exists
-		godebug.Printf(gDebug["db11"], "contractName [%s] eventName [%s], %s\n", contractName, eventName, godebug.LF())
-		godebug.Printf(gDebug["db11"], "Found contract [before overload check], %s, %s\n", contractName, godebug.LF())
+		godebug.DbPf(gDebug["db11"], "contractName [%s] eventName [%s], %s\n", contractName, eventName, godebug.LF())
+		godebug.DbPf(gDebug["db11"], "Found contract [before overload check], %s, %s\n", contractName, godebug.LF())
 		ABIraw := ABIx.RawABI
 
 		contractAddress, err := gCfg.GetContractAddress(contractName)
@@ -84,12 +84,12 @@ func doWatch(contractName, eventName string) (err error) {
 			Addresses: []common.Address{contractAddress},
 		}
 
-		godebug.Printf(gDebug["db11"], "AT: %s\n", godebug.LF())
+		godebug.DbPf(gDebug["db11"], "AT: %s\n", godebug.LF())
 
 		var ch = make(chan types.Log)
 		ctx := context.Background()
 
-		godebug.Printf(gDebug["db11"], "AT: %s\n", godebug.LF()) // last working line with truffle, "Subscribe: notifications not supported"
+		godebug.DbPf(gDebug["db11"], "AT: %s\n", godebug.LF()) // last working line with truffle, "Subscribe: notifications not supported"
 
 		sub, err := gCfg.conn.SubscribeFilterLogs(ctx, query, ch)
 		if err != nil {
@@ -97,7 +97,7 @@ func doWatch(contractName, eventName string) (err error) {
 			return err
 		}
 
-		godebug.Printf(gDebug["db11"], "AT: %s\n", godebug.LF())
+		godebug.DbPf(gDebug["db11"], "AT: %s\n", godebug.LF())
 
 		// list out the current watched events! -- capture current events in list
 		if watching, ok := CurrentWatchMap[CurrentWatchType{ContractName: contractName, EventName: eventName}]; !ok || !watching {
@@ -113,18 +113,18 @@ func doWatch(contractName, eventName string) (err error) {
 
 		go func() {
 			for {
-				godebug.Printf(gDebug["db11"], "%sWaiting for event at 'select' - AT: %s%s\n", MiscLib.ColorCyan, godebug.LF(), MiscLib.ColorReset)
+				godebug.DbPf(gDebug["db11"], "%sWaiting for event at 'select' - AT: %s%s\n", MiscLib.ColorCyan, godebug.LF(), MiscLib.ColorReset)
 				select {
 				case log := <-ch:
 					if len(log.Topics) > 0 {
 						name := gCfg.GetNameForTopic(log.Topics[0].String())
-						godebug.Printf(gDebug["db18"], "name [%s] eventName [%s], %s\n", name, eventName, godebug.LF())
+						godebug.DbPf(gDebug["db18"], "name [%s] eventName [%s], %s\n", name, eventName, godebug.LF())
 						if eventName == "" || name == eventName {
 							fmt.Printf("%sCaught Event Log:%s, %s%s\n", MiscLib.ColorGreen, godebug.LF(), godebug.SVarI(log), MiscLib.ColorReset)
-							godebug.Printf(gDebug["db15"], "%sAT:%s name ->%s<-%s\n", MiscLib.ColorYellow, godebug.LF(), name, MiscLib.ColorReset)
+							godebug.DbPf(gDebug["db15"], "%sAT:%s name ->%s<-%s\n", MiscLib.ColorYellow, godebug.LF(), name, MiscLib.ColorReset)
 
 							if event, ok := parsedABI.Events[name]; ok {
-								godebug.Printf(gDebug["db15"], "%sAT: %s%s\n", MiscLib.ColorCyan, godebug.LF(), MiscLib.ColorReset)
+								godebug.DbPf(gDebug["db15"], "%sAT: %s%s\n", MiscLib.ColorCyan, godebug.LF(), MiscLib.ColorReset)
 								arguments := event.Inputs                                 // get the inputs to the event - these will determine the unpack.
 								marshalledValues, err := arguments.UnpackValues(log.Data) // marshalledValues is an array of interface{}
 								if err != nil {
@@ -134,8 +134,8 @@ func doWatch(contractName, eventName string) (err error) {
 									// 0xBBbbBB... for 32 bytes instead of an array of byte.
 									typeModified := ReturnTypeConverter(marshalledValues)
 									fmt.Printf("%sEvent Data: %s%s\n", MiscLib.ColorGreen, godebug.SVarI(typeModified), MiscLib.ColorReset)
-									godebug.Printf(gDebug["db15ev"], "%sAT: %s %T %s\n", MiscLib.ColorCyan, godebug.LF(), marshalledValues, MiscLib.ColorReset)
-									godebug.Printf(gDebug["db15ev"], "%sAT: %s %T %s\n", MiscLib.ColorCyan, godebug.LF(), marshalledValues[0], MiscLib.ColorReset)
+									godebug.DbPf(gDebug["db15ev"], "%sAT: %s %T %s\n", MiscLib.ColorCyan, godebug.LF(), marshalledValues, MiscLib.ColorReset)
+									godebug.DbPf(gDebug["db15ev"], "%sAT: %s %T %s\n", MiscLib.ColorCyan, godebug.LF(), marshalledValues[0], MiscLib.ColorReset)
 									if gDebug["db15ev"] {
 										TypeOfSlice(marshalledValues)
 									}
@@ -144,14 +144,14 @@ func doWatch(contractName, eventName string) (err error) {
 								fmt.Printf("Error failed to lookup event [%s] in ABI\n", name)
 							}
 						} else {
-							godebug.Printf(gDebug["show.ignored.event"], "%s%s.%s - event ignored; not watched%s\n", MiscLib.ColorYellow, contractName, name, MiscLib.ColorReset)
+							godebug.DbPf(gDebug["show.ignored.event"], "%s%s.%s - event ignored; not watched%s\n", MiscLib.ColorYellow, contractName, name, MiscLib.ColorReset)
 						}
 					}
 				case err := <-sub.Err():
 					fmt.Printf("AT: %s, error=%s\n", godebug.LF(), err)
 					return
 				}
-				godebug.Printf(gDebug["db11"], "AT: %s\n", godebug.LF())
+				godebug.DbPf(gDebug["db11"], "AT: %s\n", godebug.LF())
 			}
 		}()
 

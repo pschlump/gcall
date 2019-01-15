@@ -259,7 +259,7 @@ func Bind2Contract(ABI string, address common.Address, caller bind.ContractCalle
 	if err != nil {
 		return nil, nil, err
 	}
-	godebug.Printf(gDebug["db12"], "Type of parsed = %T, value %s, %s\n", parsed, godebug.SVarI(parsed), godebug.LF())
+	godebug.DbPf(gDebug["db12"], "Type of parsed = %T, value %s, %s\n", parsed, godebug.SVarI(parsed), godebug.LF())
 	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), &parsed, nil
 }
 
@@ -288,12 +288,12 @@ func (ctm *ContractMgr) CallContract(ABI ABIType, contractName, methodName strin
 		err = fmt.Errorf("Error: %s.%s not found\n", contractName, methodName)
 		return
 	}
-	godebug.Printf(gDebug["db01"], "pos=%d, len of .ABI=%d\n", pos, len(ctm.GCfg.ContractList[contractName].ABI))
+	godebug.DbPf(gDebug["db01"], "pos=%d, len of .ABI=%d\n", pos, len(ctm.GCfg.ContractList[contractName].ABI))
 	// fmt.Printf("%sAT: %s After = %d%s\n", MiscLib.ColorYellow, godebug.LF(), len(ctm.GCfg.ContractList[contractName].ABI), MiscLib.ColorReset)
 	abi := ctm.GCfg.ContractList[contractName].ABI[pos]
 	isConst := abi.Constant
-	godebug.Printf(gDebug["db01"], "%sAT: %s, %s isConst=%v\n", MiscLib.ColorYellow, godebug.LF(), MiscLib.ColorReset, isConst)
-	godebug.Printf(gDebug["db01"], "isConst: %v\n", isConst)
+	godebug.DbPf(gDebug["db01"], "%sAT: %s, %s isConst=%v\n", MiscLib.ColorYellow, godebug.LF(), MiscLib.ColorReset, isConst)
+	godebug.DbPf(gDebug["db01"], "isConst: %v\n", isConst)
 	if len(abi.Inputs) != len(params) {
 		fmt.Printf("Error: have %d arguments passed to function needing %d params, %s\n", len(params), len(abi.Inputs), godebug.LF())
 		err = fmt.Errorf("Error: have %d arguments passed to function needing %d params\n", len(params), len(abi.Inputs))
@@ -302,9 +302,9 @@ func (ctm *ContractMgr) CallContract(ABI ABIType, contractName, methodName strin
 
 	if !isConst {
 
-		godebug.Printf(gDebug["db01"], "%sAT: %s --- Doing a Transaction -- %s\n", MiscLib.ColorGreen, godebug.LF(), MiscLib.ColorReset)
+		godebug.DbPf(gDebug["db01"], "%sAT: %s --- Doing a Transaction -- %s\n", MiscLib.ColorGreen, godebug.LF(), MiscLib.ColorReset)
 
-		godebug.Printf(gDebug["db1001"], "%sAT: %s --- Doing a Transaction -- call:%s with:%s %s\n", MiscLib.ColorGreen, godebug.LF(), methodName,
+		godebug.DbPf(gDebug["db1001"], "%sAT: %s --- Doing a Transaction -- call:%s with:%s %s\n", MiscLib.ColorGreen, godebug.LF(), methodName,
 			godebug.SVar(params), MiscLib.ColorReset)
 
 		vv, err = ctm.Transact(ctm.GCfg.TransactOpts, methodName, params...) // var vv *types.Transaction
@@ -320,7 +320,7 @@ func (ctm *ContractMgr) CallContract(ABI ABIType, contractName, methodName strin
 			return
 		}
 
-		godebug.Printf(gDebug["db05"], "%sTransact: typeof(vv) = %T, vv = %s, %s%s\n", MiscLib.ColorGreen, vv, godebug.SVarI(vv), godebug.LF(), MiscLib.ColorReset)
+		godebug.DbPf(gDebug["db05"], "%sTransact: typeof(vv) = %T, vv = %s, %s%s\n", MiscLib.ColorGreen, vv, godebug.SVarI(vv), godebug.LF(), MiscLib.ColorReset)
 		fmt.Printf("%sTx: %s%s\n", MiscLib.ColorGreen, godebug.SVarI(vv), MiscLib.ColorReset)
 		// fmt.Printf("type %T\n", res)
 
@@ -328,11 +328,11 @@ func (ctm *ContractMgr) CallContract(ABI ABIType, contractName, methodName strin
 
 	} else {
 
-		godebug.Printf(gDebug["db04"], "%sAT: %s --- Doing Constant Call -- %s\n", MiscLib.ColorGreen, godebug.LF(), MiscLib.ColorReset)
-		godebug.Printf(gDebug["db09"], "ABI: %s, %s\n", godebug.SVarI(ABI), godebug.LF())
+		godebug.DbPf(gDebug["db04"], "%sAT: %s --- Doing Constant Call -- %s\n", MiscLib.ColorGreen, godebug.LF(), MiscLib.ColorReset)
+		godebug.DbPf(gDebug["db09"], "ABI: %s, %s\n", godebug.SVarI(ABI), godebug.LF())
 
 		// xyzzy - should this be "abi.Outputs[0].Type" ??? -- See above!  // xyzzy - This only handles the case of 1 return value - error if more than one.
-		godebug.Printf(gDebug["show-return-type"], "Type: %s <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n", ABI.Outputs[0].Type)
+		godebug.DbPf(gDebug["show-return-type"], "Type: %s <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n", ABI.Outputs[0].Type)
 		switch ABI.Outputs[0].Type {
 		case "string":
 			result = new(string)
@@ -398,7 +398,7 @@ func (ctm *ContractMgr) CallContract(ABI ABIType, contractName, methodName strin
 			return
 		}
 
-		godebug.Printf(gDebug["db04"], "Call Returns: ->%s<-\n", godebug.SVar(result))
+		godebug.DbPf(gDebug["db04"], "Call Returns: ->%s<-\n", godebug.SVar(result))
 	}
 
 	return
@@ -478,10 +478,10 @@ func (gCfg *GethInfo) GetNameForTopic(aTopic string) (eventName string) {
 	for contractName, it := range gCfg.ContractList {
 		for _, anABI := range it.ABI {
 			if anABI.Type == "event" {
-				godebug.Printf(gDebug["db18"], "anABI=%s, %s\n", godebug.SVarI(anABI), godebug.LF())
+				godebug.DbPf(gDebug["db18"], "anABI=%s, %s\n", godebug.SVarI(anABI), godebug.LF())
 				eventName = anABI.Name
 				hh := gCfg.GetHashForEvent(contractName, eventName)
-				godebug.Printf(gDebug["db18"], "checking hash contractName[%s] eventName[%s], hh=%s, AT:%s\n ", contractName, eventName, hh, godebug.LF())
+				godebug.DbPf(gDebug["db18"], "checking hash contractName[%s] eventName[%s], hh=%s, AT:%s\n ", contractName, eventName, hh, godebug.LF())
 				if hh == aTopic {
 					return
 				}
@@ -530,14 +530,14 @@ Version: 0.4.21+commit.dfe3193c.Darwin.appleclang
 	ok := bytecode.VerifyCode(contractName, solcVersion, string(solcCode), ethBin[2:])
 	if !ok {
 		fmt.Printf("%sBinary for contrct %s did not match%s\n", MiscLib.ColorYellow, contractName, MiscLib.ColorReset)
-		godebug.Printf(gDebug["db21"], "ethBin: ->%s<-, bin ->%s<-\n", ethBin[2:], ethBin)
-		godebug.Printf(gDebug["db21"], "len: ethBin: %d, bin %d\n", len(ethBin[2:]), len(ethBin))
+		godebug.DbPf(gDebug["db21"], "ethBin: ->%s<-, bin ->%s<-\n", ethBin[2:], ethBin)
+		godebug.DbPf(gDebug["db21"], "len: ethBin: %d, bin %d\n", len(ethBin[2:]), len(ethBin))
 	}
 	return ok
 }
 
 func (gCfg *GethInfo) CheckAllContractsAreCurrent() {
-	godebug.Printf(gDebug["db24"], "automatically check contracts are current at this point, %s\n", godebug.LF())
+	godebug.DbPf(gDebug["db24"], "automatically check contracts are current at this point, %s\n", godebug.LF())
 	for name, ca := range ContractAddressHash {
 		// fmt.Printf("AT: %s contract %s, %s\n", godebug.LF(), name, godebug.SVar(ca))
 		if ca.ContractAddress == "" { // check for missing address - indicates contract not loaded
@@ -563,7 +563,7 @@ func GetListOfEventsFor(contractName string) (evList []string, err error) {
 		return
 	}
 
-	godebug.Printf(gDebug["db011"], "contractName [%s] %s\n", contractName, godebug.LF())
+	godebug.DbPf(gDebug["db011"], "contractName [%s] %s\n", contractName, godebug.LF())
 	ABIraw := ABIx.RawABI
 
 	contractAddress, err := gCfg.GetContractAddress(contractName)
@@ -581,7 +581,7 @@ func GetListOfEventsFor(contractName string) (evList []string, err error) {
 	}
 	_ = Contract
 
-	godebug.Printf(gDebug["db011"], "AT: %s\n", godebug.LF())
+	godebug.DbPf(gDebug["db011"], "AT: %s\n", godebug.LF())
 
 	for event := range parsedABI.Events {
 		evList = append(evList, event)

@@ -43,7 +43,7 @@ func doCurrent(cmds []string, rl *readline.Instance) {
 	if err != nil {
 		aa.Usage("current")
 	} else {
-		godebug.Printf(gDebug["db19"], "results: %s\n", godebug.SVarI(aa))
+		godebug.DbPf(gDebug["db19"], "results: %s\n", godebug.SVarI(aa))
 	}
 
 	// Run make to rebuild any binaries that we need. -------------------------------------------------
@@ -64,7 +64,7 @@ func doCurrent(cmds []string, rl *readline.Instance) {
 
 	if len(aa.Remainder) > 0 {
 		for ii, anArg := range aa.Remainder {
-			godebug.Printf(gDebug["db24"], "current contract[%s] #%d, %s\n", anArg, ii, godebug.LF())
+			godebug.DbPf(gDebug["db24"], "current contract[%s] #%d, %s\n", anArg, ii, godebug.LF())
 			if addr, ok := ContractAddressHash[anArg]; ok {
 				if addr.ContractAddress != "" {
 					cok := gCfg.CurrentContract(anArg, addr.ContractAddress)

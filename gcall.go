@@ -81,8 +81,6 @@ type AContractAddressType struct {
 var ContractAddressHash map[string]AContractAddressType
 var gCfg GethInfo
 
-// ConrractAddressHash = ReadContractAddressHash(contractAddrFile)
-
 func init() {
 	gDebug = make(map[string]bool)
 	gDebug["ethrpc.echo"] = false
@@ -232,7 +230,7 @@ func main() {
 		if len(fns) == 0 {
 			fmt.Printf("%sError: [%s] appears to not be correct for path to .abi files - none found%s\n", MiscLib.ColorRed, ap, MiscLib.ColorReset)
 		}
-		godebug.Printf(gDebug["db1000"], "%sAT: %s fns=%s %s\n", MiscLib.ColorYellow, godebug.LF(), fns, MiscLib.ColorReset)
+		godebug.DbPf(gDebug["db1000"], "%sAT: %s fns=%s %s\n", MiscLib.ColorYellow, godebug.LF(), fns, MiscLib.ColorReset)
 		missing := make([]string, 0, 15)
 		for _, fn := range fns {
 			// ----------------------------------------------------------------------------------------------
@@ -245,16 +243,16 @@ func main() {
 			fn2 := ap + "/" + fn
 			name, abi, raw := ReadABI(fn2)
 			name = RmExtIfHasExt(name, ".abi")
-			godebug.Printf(gDebug["db1000"], "%sAT: %s name=[%s] %s\n", MiscLib.ColorYellow, godebug.LF(), name, MiscLib.ColorReset)
+			godebug.DbPf(gDebug["db1000"], "%sAT: %s name=[%s] %s\n", MiscLib.ColorYellow, godebug.LF(), name, MiscLib.ColorReset)
 
 			if ct, ok := gCfg.ContractList[name]; ok {
 				ct.ABI = abi
-				godebug.Printf(gDebug["db1000"], "%sAT: %s len ct.ABI=%d%s\n", MiscLib.ColorYellow, godebug.LF(), len(abi), MiscLib.ColorReset)
+				godebug.DbPf(gDebug["db1000"], "%sAT: %s len ct.ABI=%d%s\n", MiscLib.ColorYellow, godebug.LF(), len(abi), MiscLib.ColorReset)
 				ct.RawABI = raw
 				gCfg.ContractList[name] = ct
 			} else {
 				dirty = true
-				godebug.Printf(gDebug["db1000"], "%sAT: %s len ct.ABI=%d%s\n", MiscLib.ColorCyan, godebug.LF(), len(abi), MiscLib.ColorReset)
+				godebug.DbPf(gDebug["db1000"], "%sAT: %s len ct.ABI=%d%s\n", MiscLib.ColorCyan, godebug.LF(), len(abi), MiscLib.ColorReset)
 				gCfg.ContractList[name] = ContractInfo{
 					Name:    name,
 					ABI:     abi,
@@ -307,10 +305,10 @@ func main() {
 	// 		xyzzy - Post process data - find constrctors
 
 	if dirty {
-		godebug.Printf(gDebug["db06"], "Config is dirty -need- to update\n")
+		godebug.DbPf(gDebug["db06"], "Config is dirty -need- to update\n")
 	}
 
-	godebug.Printf(gDebug["dumpCfg0"], "AT: %s gCfg=%s\n", godebug.LF(), godebug.SVarI(gCfg))
+	godebug.DbPf(gDebug["dumpCfg0"], "AT: %s gCfg=%s\n", godebug.LF(), godebug.SVarI(gCfg))
 
 	// --------------------------------------------------------------------------------------------------------
 	// Get connection to Geth
@@ -353,12 +351,12 @@ func main() {
 		// Xyzzy - Create a "go-routine" that will lock and call to unlock account for duration of processing [ set to 10 min for unlock ]
 		x := gCfg.rpc_client.PersonalUnlockAccount(gCfg.FromAddress, gCfg.FromAddressPassword, gCfg.UnlockSeconds)
 		if x == nil {
-			godebug.Printf(gDebug["db06"], "AT: %s %sSuccess on personal.unlockAccount()%s\n", godebug.LF(), MiscLib.ColorGreen, MiscLib.ColorReset)
+			godebug.DbPf(gDebug["db06"], "AT: %s %sSuccess on personal.unlockAccount()%s\n", godebug.LF(), MiscLib.ColorGreen, MiscLib.ColorReset)
 			fmt.Printf("%sSuccess Account(%s) Unlocked%s\n", MiscLib.ColorGreen, gCfg.FromAddress, MiscLib.ColorReset)
 		} else {
 			fmt.Printf("Error! AT: %s %sx=%s%s\n", godebug.LF(), MiscLib.ColorRed, x, MiscLib.ColorReset)
 		}
-		godebug.Printf(gDebug["db07"], "AT: %s %sSuccessfully unlocked account - ready to start main loop%s\n", godebug.LF(), MiscLib.ColorGreen, MiscLib.ColorReset)
+		godebug.DbPf(gDebug["db07"], "AT: %s %sSuccessfully unlocked account - ready to start main loop%s\n", godebug.LF(), MiscLib.ColorGreen, MiscLib.ColorReset)
 	}
 
 	err = gCfg.SetTransactOpts()
@@ -510,7 +508,7 @@ Loop:
 			if err != nil {
 				aa.Usage("list")
 			} else {
-				godebug.Printf(gDebug["db19"], "results: %s\n", godebug.SVarI(aa))
+				godebug.DbPf(gDebug["db19"], "results: %s\n", godebug.SVarI(aa))
 			}
 
 			// ---- Implementation  --------------------------------------------------------------------------
@@ -534,7 +532,7 @@ Loop:
 						continue Loop
 					}
 					ABI := ABIx.ABI
-					godebug.Printf(gDebug["db18"], "ABI=%s\n", godebug.SVar(ABI))
+					godebug.DbPf(gDebug["db18"], "ABI=%s\n", godebug.SVar(ABI))
 					fmt.Printf("%-30s %-5s %-2s %-42s\n", "Method Name", "Const", "$", "Params")
 					fmt.Printf("%-30s %-5s %-2s %-42s\n", "------------------------------", "-----", "--", "------------------------------------------")
 
@@ -699,8 +697,8 @@ Loop:
 
 		default:
 			// /Users/corwin/go/src/www.2c-why.com/Corp-Reg/MidGeth/EthContractCall	xyzzyEthCall
-			godebug.Printf(gDebug["db02"], "cmd: %s was not recognized, %s\n", cmds[0], godebug.LF())
-			godebug.Printf(gDebug["db32"], "cmds[...]: %s, %s\n", cmds, godebug.LF())
+			godebug.DbPf(gDebug["db02"], "cmd: %s was not recognized, %s\n", cmds[0], godebug.LF())
+			godebug.DbPf(gDebug["db32"], "cmds[...]: %s, %s\n", cmds, godebug.LF())
 			done := false
 
 			// 		xyzzy - may want to check for "./" or / at leading of cmd - indicates not a contract call.
@@ -711,11 +709,11 @@ Loop:
 			p2 := strings.Split(cmds[0], ".")
 			if len(p2) == 2 {
 				contractName, methodName := p2[0], p2[1]
-				godebug.Printf(gDebug["dump.contractInfo"], "contractName [%s] methodName [%s], %s\n", contractName, methodName, godebug.LF())
-				godebug.Printf(gDebug["dump.contractInfo"], "%sAT: %s After = %d%s\n", MiscLib.ColorYellow, godebug.LF(), len(gCfg.ContractList[contractName].ABI), MiscLib.ColorReset)
+				godebug.DbPf(gDebug["dump.contractInfo"], "contractName [%s] methodName [%s], %s\n", contractName, methodName, godebug.LF())
+				godebug.DbPf(gDebug["dump.contractInfo"], "%sAT: %s After = %d%s\n", MiscLib.ColorYellow, godebug.LF(), len(gCfg.ContractList[contractName].ABI), MiscLib.ColorReset)
 				if ABIx, ok := gCfg.ContractList[contractName]; ok { // check that it exists	// xyzzy900
-					godebug.Printf(gDebug["db01"], "contractName [%s] methodName [%s], %s\n", contractName, methodName, godebug.LF())
-					godebug.Printf(gDebug["db01"], "Found contract [before overload check], %s, %s\n", contractName, godebug.LF())
+					godebug.DbPf(gDebug["db01"], "contractName [%s] methodName [%s], %s\n", contractName, methodName, godebug.LF())
+					godebug.DbPf(gDebug["db01"], "Found contract [before overload check], %s, %s\n", contractName, godebug.LF())
 					done = true // If looks like a contract but mis-match of parameters - then call it an error, don't look for a script.
 					ABIraw := ABIx.RawABI
 
@@ -745,12 +743,12 @@ Loop:
 						}
 					}
 
-					godebug.Printf(gDebug["dump.ABIMethod"], "ABIMethod = %d\n", ABIMethod)
+					godebug.DbPf(gDebug["dump.ABIMethod"], "ABIMethod = %d\n", ABIMethod)
 
 					// this is be the "CallContract" section
 					param := cmds[1:]
 					nParam := len(param)
-					godebug.Printf(gDebug["db05"], "%sParam: %s, nParam=%d %s, %s\n", MiscLib.ColorCyan, param, nParam, MiscLib.ColorReset, godebug.LF())
+					godebug.DbPf(gDebug["db05"], "%sParam: %s, nParam=%d %s, %s\n", MiscLib.ColorCyan, param, nParam, MiscLib.ColorReset, godebug.LF())
 
 					ABIMethodSet, nfound := gCfg.IsValidMethodNameSet(contractName, methodName, nParam)
 					if nfound == 0 {
@@ -792,7 +790,7 @@ Loop:
 							matchOverload = true
 							// fmt.Printf("%sAT: %s%s\n", MiscLib.ColorCyan, godebug.LF(), MiscLib.ColorReset)
 							usedItemNo = itemNo
-							godebug.Printf(gDebug["db10"], "%sAT: %s usedItemNo=%d %s\n", MiscLib.ColorCyan, godebug.LF(), usedItemNo, MiscLib.ColorReset)
+							godebug.DbPf(gDebug["db10"], "%sAT: %s usedItemNo=%d %s\n", MiscLib.ColorCyan, godebug.LF(), usedItemNo, MiscLib.ColorReset)
 
 						TypeConv:
 							for iP, aParam := range param {
@@ -854,7 +852,7 @@ Loop:
 									if len(s) > 2 && s[0:2] != "0x" {
 										s = "0x" + s
 									}
-									godebug.Printf(gDebug["db31"], "%s Converting ->%s<- string into address param #[%d], %s%s\n", MiscLib.ColorCyan, s, iP, godebug.LF(), MiscLib.ColorReset)
+									godebug.DbPf(gDebug["db31"], "%s Converting ->%s<- string into address param #[%d], %s%s\n", MiscLib.ColorCyan, s, iP, godebug.LF(), MiscLib.ColorReset)
 									a := common.HexToAddress(s) // a := common.Address(s)
 									iParam[iP] = a
 
@@ -881,7 +879,7 @@ Loop:
 							}
 							// fmt.Printf("%sAT: %s%s\n", MiscLib.ColorCyan, godebug.LF(), MiscLib.ColorReset)
 							if matchOverload {
-								godebug.Printf(gDebug["db10"], "%sAT: %s -- successful match and coerce of parameters -- %s\n", MiscLib.ColorGreen, godebug.LF(), MiscLib.ColorReset)
+								godebug.DbPf(gDebug["db10"], "%sAT: %s -- successful match and coerce of parameters -- %s\n", MiscLib.ColorGreen, godebug.LF(), MiscLib.ColorReset)
 								break Outer // Success!
 							}
 						}
@@ -892,7 +890,7 @@ Loop:
 						// xyzzy gCfg.PrintMatchingFunctions ( ABIMethodSet, contractName, methodName )
 					} else {
 
-						godebug.Printf(gDebug["db02"], "%sAT: %s -- .CallContract() now -- %s\n", MiscLib.ColorCyan, godebug.LF(), MiscLib.ColorReset)
+						godebug.DbPf(gDebug["db02"], "%sAT: %s -- .CallContract() now -- %s\n", MiscLib.ColorCyan, godebug.LF(), MiscLib.ColorReset)
 
 						res, Tx, err := ctm.CallContract(gCfg.ContractList[contractName].ABI[usedItemNo], contractName, methodName, iParam...)
 
