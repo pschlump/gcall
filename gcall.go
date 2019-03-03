@@ -42,9 +42,11 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"         //
 	"github.com/pschlump/GCall/args"                    //
 	"github.com/pschlump/MiscLib"                       //
-	"github.com/pschlump/ethrpc"                        // OLD: "github.com/onrik/ethrpc" - modified with new functions and functionality
-	"github.com/pschlump/godebug"                       //
+	"github.com/pschlump/ethrpcx"
+	"github.com/pschlump/godebug" //
 )
+
+// OLD: "github.com/onrik/ethrpc" - modified with new functions -
 
 var Cfg = flag.String("cfg", "cfg.json", "config file for this call")            // 0
 var GethURL_ws = flag.String("ws", "", "Websocket address for geth")             // 1 -- needed for event watch
@@ -83,7 +85,7 @@ var gCfg GethInfo
 
 func init() {
 	gDebug = make(map[string]bool)
-	gDebug["ethrpc.echo"] = false
+	gDebug["ethrpcx.echo"] = false
 	gDebug["dump.ABIMethod"] = false
 	gDebug["db01"] = false
 	gDebug["db02"] = false
@@ -321,9 +323,9 @@ func main() {
 
 	gCfg.conn = conn
 
-	client := ethrpc.NewEthRPC(gCfg.GethURL_http)
-	client.Db01 = gDebug["ethrpc.echo"] // Echo message sent on JSON RPC	// xyzzy - settable from --> cli
-	client.Db02 = gDebug["ethrpc.echo"] // Echo responce recevied back
+	client := ethrpcx.NewEthRPC(gCfg.GethURL_http)
+	client.Db01 = gDebug["ethrpcx.echo"] // Echo message sent on JSON RPC	// xyzzy - settable from --> cli
+	client.Db02 = gDebug["ethrpcx.echo"] // Echo responce recevied back
 	client.LogWith = func(s string) {
 		if log0 != nil {
 			fmt.Fprintf(log0, `{ "lt":"callreturn", "data": %q }`+"\n\n", s)

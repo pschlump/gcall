@@ -42,12 +42,12 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind" //
 	"github.com/ethereum/go-ethereum/common"            //
 	"github.com/ethereum/go-ethereum/core/types"        //
-	"github.com/ethereum/go-ethereum/crypto/sha3"       //
 	"github.com/ethereum/go-ethereum/ethclient"         //
 	"github.com/pschlump/GCall/bytecode"                //
 	"github.com/pschlump/MiscLib"                       //
-	"github.com/pschlump/ethrpc"                        // OLD: "github.com/onrik/ethrpc" - modified with new functions and functionality
-	"github.com/pschlump/godebug"                       //
+	ethrpcx "github.com/pschlump/ethrpcx"
+	"github.com/pschlump/godebug" //
+	"golang.org/x/crypto/sha3"
 )
 
 // -----------------------------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ type GethInfo struct {
 	PullAddressChanges  string                     //  xyzzy082 Sh Script To: ( cd address_dir ; git pull )
 	NetworkFlag         map[string]GethInfoNetwork //
 	conn                *ethclient.Client          // geth connection
-	rpc_client          *ethrpc.EthRPC             //
+	rpc_client          *ethrpcx.EthRPC            //
 	CallOpts            *bind.CallOpts             // Call options to use throughout this session
 	TransactOpts        *bind.TransactOpts         // Transaction auth options to use throughout this session
 }
@@ -464,7 +464,7 @@ func (gCfg *GethInfo) GetCanonicalNameFor(contractName, itemName, cls string) (c
 }
 
 func (gCfg *GethInfo) GetHashForEvent(contractName, eventName string) (rv string) {
-	hash := sha3.NewKeccak256()
+	hash := sha3.NewLegacyKeccak256()
 	var buf []byte
 	// hash.Write([]byte("ReportGreetingEvent(string)"))
 	hash.Write([]byte(gCfg.GetCanonicalNameFor(contractName, eventName, "event")))

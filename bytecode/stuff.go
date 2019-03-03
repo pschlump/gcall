@@ -37,7 +37,7 @@ func VerifyCode(contractName, solcVersion string, solcCode, eth string) (rv bool
 		if endAt >= 0 {
 			solcChunk = rest[0:endAt]
 		}
-		// godebug.Printf(db1, "AT: %s codeHeader [%s] beginAt: %d, solcChunk ->%s< endAt:%d\n", godebug.LF(), codeHeader, beginAt, solcChunk, endAt)
+		// godebug.DbPf(db1, "AT: %s codeHeader [%s] beginAt: %d, solcChunk ->%s< endAt:%d\n", godebug.LF(), codeHeader, beginAt, solcChunk, endAt)
 		_ = codeHeader
 
 		endAtEth := strings.Index(eth, "a165627a7a72305820")
@@ -56,7 +56,7 @@ func VerifyCode(contractName, solcVersion string, solcCode, eth string) (rv bool
 
 		rv = (solcChunk == ethChunk)
 
-		// godebug.Printf(db1, "AT: %s codeHeader [%s] ethChunk ->%s< endAtEth:%d, rv=%v\n", godebug.LF(), codeHeader, ethChunk, endAtEth, rv)
+		// godebug.DbPf(db1, "AT: %s codeHeader [%s] ethChunk ->%s< endAtEth:%d, rv=%v\n", godebug.LF(), codeHeader, ethChunk, endAtEth, rv)
 
 		return
 	}

@@ -26,11 +26,10 @@ SOFTWARE.
 
 import (
 	"fmt"
+	"github.com/pschlump/ethrpcx" // OLD: "github.com/onrik/ethrpc" - modified with new functions -
+	"github.com/pschlump/godebug" //
 	"log"
 	"math/big"
-
-	"github.com/pschlump/ethrpc"  // OLD: "github.com/onrik/ethrpc" - modified with new functions -
-	"github.com/pschlump/godebug" //
 )
 
 // -------------------------------------------------------------------------------------------------
@@ -47,7 +46,7 @@ func SendFunds() {
 	fmt.Printf("Version: %v\n", version)
 
 	// Send 1 eth
-	txid, err := client.EthSendTransaction(ethrpc.T{
+	txid, err := client.EthSendTransaction(ethrpcx.T{
 		From:  "0x6247cf0412c6462da2a51d05139e2a3c6c630f0a",
 		To:    "0xcfa202c4268749fbb5136f2b68f7402984ed444b",
 		Value: big.NewInt(1000000000000000000),
