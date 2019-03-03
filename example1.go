@@ -26,17 +26,18 @@ SOFTWARE.
 
 import (
 	"fmt"
-	"github.com/pschlump/ethrpcx" // OLD: "github.com/onrik/ethrpc" - modified with new functions -
-	"github.com/pschlump/godebug" //
 	"log"
 	"math/big"
+
+	"github.com/pschlump/ethrpcx"
+	"github.com/pschlump/godebug"
 )
 
 // -------------------------------------------------------------------------------------------------
 // From: https://github.com/onrik/ethrpc
 // An example!
 func SendFunds() {
-	client := ethrpc.NewEthRPC("http://127.0.0.1:8545")
+	client := ethrpcx.NewEthRPC("http://127.0.0.1:8545")
 
 	version, err := client.Web3ClientVersion()
 	if err != nil {

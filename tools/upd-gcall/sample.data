@@ -1,0 +1,88 @@
+Compiling ./contracts/AddrStore.sol...
+Compiling ./contracts/CorpRegToken.sol...
+Compiling ./contracts/Migrations.sol...
+Compiling ./contracts/SimpleToken.sol...
+Compiling ./contracts/Terminatable.sol...
+Compiling ./contracts/zeppelin-solidity/contracts/lifecycle/Pausable.sol...
+Compiling ./contracts/zeppelin-solidity/contracts/math/SafeMath.sol...
+Compiling ./contracts/zeppelin-solidity/contracts/ownership/Ownable.sol...
+Compiling ./contracts/zeppelin-solidity/contracts/token/ERC20/BasicToken.sol...
+Compiling ./contracts/zeppelin-solidity/contracts/token/ERC20/ERC20.sol...
+Compiling ./contracts/zeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol...
+Compiling ./contracts/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol...
+
+Compilation warnings encountered:
+
+/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/zeppelin-solidity/contracts/ownership/Ownable.sol:38:5: Warning: Invoking events without "emit" prefix is deprecated.
+    OwnershipTransferred(owner, newOwner);
+    ^-----------------------------------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/AddrStore.sol:28:4: Warning: Invoking events without "emit" prefix is deprecated.
+			AddressUpdated ( _item, 1, _addr );		// New Item
+			^--------------------------------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/AddrStore.sol:31:4: Warning: Invoking events without "emit" prefix is deprecated.
+			AddressUpdated ( _item, 0, _addr );		// Update Item
+			^--------------------------------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/zeppelin-solidity/contracts/token/ERC20/BasicToken.sol:38:5: Warning: Invoking events without "emit" prefix is deprecated.
+    Transfer(msg.sender, _to, _value);
+    ^-------------------------------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol:32:5: Warning: Invoking events without "emit" prefix is deprecated.
+    Transfer(_from, _to, _value);
+    ^--------------------------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol:48:5: Warning: Invoking events without "emit" prefix is deprecated.
+    Approval(msg.sender, _spender, _value);
+    ^------------------------------------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol:74:5: Warning: Invoking events without "emit" prefix is deprecated.
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    ^-----------------------------------------------------------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol:95:5: Warning: Invoking events without "emit" prefix is deprecated.
+    Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+    ^-----------------------------------------------------------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/zeppelin-solidity/contracts/lifecycle/Pausable.sol:39:5: Warning: Invoking events without "emit" prefix is deprecated.
+    Pause();
+    ^-----^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/zeppelin-solidity/contracts/lifecycle/Pausable.sol:47:5: Warning: Invoking events without "emit" prefix is deprecated.
+    Unpause();
+    ^-------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/Terminatable.sol:31:9: Warning: Invoking events without "emit" prefix is deprecated.
+        Terminate();
+        ^---------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/Terminatable.sol:37:9: Warning: Invoking events without "emit" prefix is deprecated.
+        Unterminate();
+        ^-----------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/CorpRegToken.sol:93:3: Warning: Invoking events without "emit" prefix is deprecated.
+		Transfer(msg.sender, _to, _value);
+		^-------------------------------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/CorpRegToken.sol:115:3: Warning: Invoking events without "emit" prefix is deprecated.
+		Transfer(_from, _to, _value);
+		^--------------------------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/CorpRegToken.sol:121:18: Warning: Using contract member "balance" inherited from the address type is deprecated. Convert the contract to "address" type to access the member.
+		owner.transfer(this.balance);
+		               ^----------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/SimpleToken.sol:25:3: Warning: Invoking events without "emit" prefix is deprecated.
+		Transfer(0x0, msg.sender, INITIAL_SUPPLY);
+		^---------------------------------------^
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/CorpRegToken.sol:139:2: Warning: Function state mutability can be restricted to view
+	function mint(uint256 _new) onlyOwner public {
+ ^ (Relevant source part starts here and spans across multiple lines).
+,/Users/corwin/go/src/www.2c-why.com/Corp-Reg/tok-ops/user/TTT/contracts/CorpRegToken.sol:151:5: Warning: Function state mutability can be restricted to view
+    function burn(uint256 _value) onlyOwner public {
+    ^ (Relevant source part starts here and spans across multiple lines).
+
+Writing artifacts to ./build/contracts
+
+Using network 'local'.
+
+Running migration: 1_initial_migration.js
+  Replacing Migrations...
+  ... 0x0a43284fc690b0588b5be7ff534e999661abbd006b50dd8deec083734c3aba3e
+  Migrations: 0x65740b94bff87e8ab14fc37c1201fa43132746f8
+Saving successful migration to network...
+  ... 0xfe592c6e75c9fe6c580eb3ef606ca9fc568d1e550130f191797430ea19673b95
+Saving artifacts...
+Running migration: 2_initial_migration.js
+  Deploying SimpleToken...
+  ... 0x62cdc5ac81af06524df81393d3f4aa5a2ec90ed089dcb6e0ea09a58f84020568
+  SimpleToken: 0xbfae441f574715049dc33b75cd5f5dd9dcd5c459
+Saving successful migration to network...
+  ... 0x28e2340859108b472a838bf728dbfa8936b271f566fd712b8ec546a8e6267a98
+Saving artifacts...
