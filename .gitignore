@@ -21,3 +21,4 @@ contracts/mortal.bin
 contracts/mortal.bin-runtime
 contracts/mortal_sol_mortal.abi
 contracts/mortal_sol_mortal.bin
+go.sum
