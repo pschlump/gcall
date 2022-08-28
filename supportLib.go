@@ -332,56 +332,103 @@ func (ctm *ContractMgr) CallContract(ABI ABIType, contractName, methodName strin
 		godebug.DbPf(gDebug["db09"], "ABI: %s, %s\n", godebug.SVarI(ABI), godebug.LF())
 
 		// xyzzy - should this be "abi.Outputs[0].Type" ??? -- See above!  // xyzzy - This only handles the case of 1 return value - error if more than one.
-		godebug.DbPf(gDebug["show-return-type"], "Type: %s <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n", ABI.Outputs[0].Type)
-		switch ABI.Outputs[0].Type {
-		case "string":
-			result = new(string)
-		case "uint256":
-			result = new(*big.Int)
-		case "int256":
-			result = new(*big.Int)
-		case "address":
-			result = new(common.Address)
-		case "int8":
-			result = new(int8)
-		case "int16":
-			result = new(int16)
-		case "int24", "int32":
-			result = new(int32)
-		case "int64", "int40", "int48", "int56":
-			result = new(int64)
-		case "int72", "int80", "int88", "int96", "int104", "int112", "int120", "int128":
-			result = new(*big.Int)
-		case "int":
-			result = new(*big.Int)
-		case "uint8":
-			result = new(uint8)
-		case "uint16":
-			result = new(uint16)
-		case "uint24", "uint32":
-			result = new(uint32)
-		case "uint64", "uint40", "uint48", "uint56":
-			result = new(uint64)
-		case "uint72", "uint80", "uint88", "uint96", "uint104", "uint112", "uint120", "uint128":
-			result = new(*big.Int)
-		case "uint":
-			result = new(*big.Int)
-		case "bool":
-			result = new(bool)
-		case "bytes32":
-			// fmt.Printf("%s ********* New/Bad Type (Probably Fatal): %s AT: %s%s\n", MiscLib.ColorRed, ABI.Outputs[0].Type, godebug.LF(), MiscLib.ColorReset)
-			result = new([32]byte)
-		default:
+		godebug.DbPf(gDebug["show-return-type"], "Length %d Type: %s <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n", len(ABI.Outputs), ABI.Outputs[0].Type)
+		var genReturn = func(Type string) (result interface{}) {
+			switch ABI.Outputs[0].Type {
+			case "string":
+				result = new(string)
+			case "uint256":
+				result = new(*big.Int)
+			case "int256":
+				result = new(*big.Int)
+			case "address":
+				result = new(common.Address)
+			case "int8":
+				result = new(int8)
+			case "int16":
+				result = new(int16)
+			case "int24", "int32":
+				result = new(int32)
+			case "int64", "int40", "int48", "int56":
+				result = new(int64)
+			case "int72", "int80", "int88", "int96", "int104", "int112", "int120", "int128":
+				result = new(*big.Int)
+			case "int":
+				result = new(*big.Int)
+			case "uint8":
+				result = new(uint8)
+			case "uint16":
+				result = new(uint16)
+			case "uint24", "uint32":
+				result = new(uint32)
+			case "uint64", "uint40", "uint48", "uint56":
+				result = new(uint64)
+			case "uint72", "uint80", "uint88", "uint96", "uint104", "uint112", "uint120", "uint128":
+				result = new(*big.Int)
+			case "uint":
+				result = new(*big.Int)
+			case "bool":
+				result = new(bool)
+			case "bytes32":
+				// fmt.Printf("%s ********* New/Bad Type (Probably Fatal): %s AT: %s%s\n", MiscLib.ColorRed, ABI.Outputs[0].Type, godebug.LF(), MiscLib.ColorReset)
+				result = new([32]byte)
+			case "uint256[]":
+				fmt.Printf("%s ********* New Type - checked: %s AT: %s%s\n", MiscLib.ColorCyan, ABI.Outputs[0].Type, godebug.LF(), MiscLib.ColorReset)
+				result = new([]*big.Int)
+			default:
+				fmt.Printf("%sBad Type (Will Be Fatal): ---->>>>%s<<<<---- AT: %s%s\n", MiscLib.ColorRed, ABI.Outputs[0].Type, godebug.LF(), MiscLib.ColorReset)
+				result = new(*interface{})
+			}
+			return
+		}
+		if len(ABI.Outputs) == 1 {
+			result = genReturn(ABI.Outputs[0].Type)
+		} else if len(ABI.Outputs) > 1 {
+			/* God dammed stupid approach:
+			   // Vipers is a free data retrieval call binding the contract method 0x8b1e199b.
+			   //
+			   // Solidity: function vipers( uint256) constant returns(genes uint8, matronId uint256, sireId uint256, purchasePrice uint256, breadPrice uint256)
+			   func (_ViperToken *ViperTokenCaller) Vipers(opts *bind.CallOpts, arg0 *big.Int) (struct {
+			   	Genes         uint8
+			   	MatronId      *big.Int
+			   	SireId        *big.Int
+			   	PurchasePrice *big.Int
+			   	BreadPrice    *big.Int
+			   }, error) {
+			   	ret := new(struct {
+			   		Genes         uint8
+			   		MatronId      *big.Int
+			   		SireId        *big.Int
+			   		PurchasePrice *big.Int
+			   		BreadPrice    *big.Int
+			   	})
+			   	out := ret
+			   	err := _ViperToken.contract.Call(opts, out, "vipers", arg0)
+			   	return *ret, err
+			   }
+			*/
+			fmt.Printf("%sMultiple Outputs ( Won't Work:!!! ): ---->>>>%s<<<<---- AT: %s%s\n", MiscLib.ColorRed, godebug.SVarI(ABI.Outputs), godebug.LF(), MiscLib.ColorReset)
+			resultTmp := make([]interface{}, 0, len(ABI.Outputs))
+			for ii := 0; ii < len(ABI.Outputs); ii++ {
+				tmp := genReturn(ABI.Outputs[0].Type)
+				resultTmp = append(resultTmp, tmp)
+			}
+			result = resultTmp
+		} else {
 			fmt.Printf("%sBad Type (Will Be Fatal): ---->>>>%s<<<<---- AT: %s%s\n", MiscLib.ColorRed, ABI.Outputs[0].Type, godebug.LF(), MiscLib.ColorReset)
 			result = new(*interface{})
 		}
 		// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< xyzzyErr1
 		// fmt.Printf("%x CallOpts\n", ctm.GCfg.CallOpts)
-		err = ctm.Call(ctm.GCfg.CallOpts, result, methodName, params...)
+		err = ctm.Call(ctm.GCfg.CallOpts, &result, methodName, params...)
 		if err != nil {
-			fmt.Printf("Error on Contract call to %s: %s, %s\n", methodName, err, godebug.LF())
+			fmt.Printf("Error on Contract call to %s: %s, %s !! Imortant: ->%s<- is the type that is not mapped\n", methodName, err, godebug.LF(), ABI.Outputs[0].Type)
+			fmt.Printf("	Error ABI: %s\n", godebug.SVarI(ABI.Outputs))
 			/*
+				Problem if multiple return values then?  what is the type, try []of interface{}.
 
+			*/
+			/*
 					⇒  KeepGroup.getGroupIndex 0x23232323232
 					Error on Contract call to getGroupIndex: abi: unmarshalling empty output, File: /Users/corwin/go/src/github.com/pschlump/GCall/gcall.go LineNo:1618
 					Error: abi: unmarshalling empty output on call to KeepGroup.getGroupIndex params [0x23232323232]
@@ -390,8 +437,8 @@ func (ctm *ContractMgr) CallContract(ABI ABIType, contractName, methodName strin
 					----------------------------------------------------------------------------------------------------------------------
 
 				   xyzzy000 -- cause by call to fucntion returning more than 1 argument -
-				   	contracts/CorpRegToken.sol -
-				   		function getCapTable(uint256 ii) public view returns ( address aa, uint256 nn_capTableData ) {
+					contracts/CorpRegToken.sol -
+						function getCapTable(uint256 ii) public view returns ( address aa, uint256 nn_capTableData ) {
 				   Error on Contract call to getCapTable: abi: cannot unmarshal common.Address into uint8, File: /Users/corwin/go/src/github.com/pschlump/GCall/gcall.go LineNo:1314
 				   Error: abi: cannot unmarshal common.Address into uint8 on call to CorpRegToken.getCapTable params [0]
 			*/
