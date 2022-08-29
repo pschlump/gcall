@@ -28,7 +28,7 @@
 			,"FromAddress"         	: "0x6ffba2d0f4c8fd7961f516af43c55fe2d56f6044"
 			,"FromAddressPassword" 	: "$ENV$AcctPw_g2"
 			,"KeyFile"             	: "./UTC--2018-02-15T19-57-35.216297214Z--6ffba2d0f4c8fd7961f516af43c55fe2d56f6044"
-			,"KeyFilePassword"     	: "password"
+			,"KeyFilePassword"     	: "example-password"
 		}
 	}
 }
