@@ -38,7 +38,7 @@ import (
 	"strings"
 
 	"github.com/pschlump/GCall/jsonSyntaxErrorLib"
-	"github.com/pschlump/godebug"
+	"github.com/pschlump/dbgo"
 	"github.com/pschlump/pw"
 )
 
@@ -361,7 +361,7 @@ func ReadConfig(fn string) (rv GethInfo) {
 // name, abi := ReadABI(fn)
 func ReadABI(fn string) (name string, ABI []ABIType, raw string) {
 
-	godebug.DbPf(gDebug["db19"], "fn=%s AT=%s\n", fn, godebug.LF())
+	dbgo.DbPf(gDebug["db19"], "fn=%s AT=%s\n", fn, dbgo.LF())
 
 	// Infer name from fn
 	s0 := strings.Split(filepath.Base(fn), "_") // maybee immediately preceding _sol_
@@ -374,7 +374,7 @@ func ReadABI(fn string) (name string, ABI []ABIType, raw string) {
 	if len(s0) > 0 {
 		name = s0[0]
 	}
-	godebug.DbPf(gDebug["db19"], "fn=%s s0=%s name=->%s<-, AT=%s\n", fn, godebug.SVar(s0), name, godebug.LF())
+	dbgo.DbPf(gDebug["db19"], "fn=%s s0=%s name=->%s<-, AT=%s\n", fn, dbgo.SVar(s0), name, dbgo.LF())
 
 	data, err := ioutil.ReadFile(fn)
 	if err != nil {

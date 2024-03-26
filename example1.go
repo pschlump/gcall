@@ -29,8 +29,8 @@ import (
 	"log"
 	"math/big"
 
+	"github.com/pschlump/dbgo"
 	"github.com/pschlump/ethrpcx"
-	"github.com/pschlump/godebug"
 )
 
 // -------------------------------------------------------------------------------------------------
@@ -56,5 +56,5 @@ func SendFunds() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Txid = %s\n", godebug.SVarI(txid))
+	fmt.Printf("Txid = %s\n", dbgo.SVarI(txid))
 }

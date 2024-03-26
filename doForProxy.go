@@ -30,7 +30,7 @@ import (
 
 	"github.com/chzyer/readline" //
 	"github.com/pschlump/MiscLib"
-	"github.com/pschlump/godebug"
+	"github.com/pschlump/dbgo"
 )
 
 // proxyfor ProxyName ActualContract
@@ -79,7 +79,7 @@ func doForProxy(cmds []string, rl *readline.Instance) {
 	ProxyABIraw := ABIx.RawABI
 
 	isProxy := false
-	godebug.DbPf(gDebug["db38"], "ABI=%s\n", godebug.SVar(ABI))
+	dbgo.DbPf(gDebug["db38"], "ABI=%s\n", dbgo.SVar(ABI))
 	for _, aAbi := range ABI {
 		if aAbi.Type == "fallback" {
 			isProxy = true
@@ -87,7 +87,7 @@ func doForProxy(cmds []string, rl *readline.Instance) {
 		}
 	}
 
-	godebug.DbPf(gDebug["db38"], "isProxy = %v, %s\n", isProxy, godebug.LF())
+	dbgo.DbPf(gDebug["db38"], "isProxy = %v, %s\n", isProxy, dbgo.LF())
 
 	if isProxy {
 		fmt.Printf("%s is a proxy contract\n", ProxyName)
@@ -124,12 +124,12 @@ func doForProxy(cmds []string, rl *readline.Instance) {
 		}
 	}
 
-	godebug.DbPf(gDebug["db38"], "%s are the found functions, %s\n", godebug.SVarI(MergeData), godebug.LF())
+	dbgo.DbPf(gDebug["db38"], "%s are the found functions, %s\n", dbgo.SVarI(MergeData), dbgo.LF())
 
-	godebug.DbPf(gDebug["db38"], "Before: %s\n", godebug.SVarI(gCfg.ContractList[ProxyName]))
+	dbgo.DbPf(gDebug["db38"], "Before: %s\n", dbgo.SVarI(gCfg.ContractList[ProxyName]))
 	ABIx.ABI = append(ABIx.ABI, MergeData...)
 	gCfg.ContractList[ProxyName] = ABIx
-	godebug.DbPf(gDebug["db38"], "After: %s\n", godebug.SVarI(gCfg.ContractList[ProxyName]))
+	dbgo.DbPf(gDebug["db38"], "After: %s\n", dbgo.SVarI(gCfg.ContractList[ProxyName]))
 
 	// We need to mangle Raw?
 
@@ -144,7 +144,7 @@ func doForProxy(cmds []string, rl *readline.Instance) {
 		fmt.Printf("Unable to parse >%s<, error %s\n", ActualABIraw, err)
 	}
 
-	// fmt.Printf("actualTmp=%s, %s\n", godebug.SVarI(actualTmp), godebug.LF())
+	// fmt.Printf("actualTmp=%s, %s\n", dbgo.SVarI(actualTmp), dbgo.LF())
 
 	for _, dat := range actualTmp {
 		newName := ""
@@ -170,13 +170,13 @@ func doForProxy(cmds []string, rl *readline.Instance) {
 		names[newName] = 2
 	}
 
-	godebug.DbPf(gDebug["db39"], "RawABI Before: %s\n", godebug.SVarI(gCfg.ContractList[ProxyName]))
-	godebug.DbPf(gDebug["db39"], "RawABI Before: -->%s<--\n", gCfg.ContractList[ProxyName].RawABI)
+	dbgo.DbPf(gDebug["db39"], "RawABI Before: %s\n", dbgo.SVarI(gCfg.ContractList[ProxyName]))
+	dbgo.DbPf(gDebug["db39"], "RawABI Before: -->%s<--\n", gCfg.ContractList[ProxyName].RawABI)
 
-	ABIx.RawABI = godebug.SVarI(proxyTmp)
+	ABIx.RawABI = dbgo.SVarI(proxyTmp)
 	gCfg.ContractList[ProxyName] = ABIx
 
-	godebug.DbPf(gDebug["db39"], "RawABI After: %s\n", godebug.SVarI(gCfg.ContractList[ProxyName]))
-	godebug.DbPf(gDebug["db39"], "RawABI After: -->%s<--\n", gCfg.ContractList[ProxyName].RawABI)
+	dbgo.DbPf(gDebug["db39"], "RawABI After: %s\n", dbgo.SVarI(gCfg.ContractList[ProxyName]))
+	dbgo.DbPf(gDebug["db39"], "RawABI After: -->%s<--\n", gCfg.ContractList[ProxyName].RawABI)
 
 }

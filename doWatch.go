@@ -33,7 +33,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"     //
 	"github.com/ethereum/go-ethereum/core/types" //
 	"github.com/pschlump/MiscLib"                //
-	"github.com/pschlump/godebug"                //
+	"github.com/pschlump/dbgo"                   //
 )
 
 // --------------------------------------------------------------------------------------------------------
@@ -63,8 +63,8 @@ import (
 func doWatch(contractName, eventName string) (err error) {
 
 	if ABIx, ok := gCfg.ContractList[contractName]; ok { // check that it exists
-		godebug.DbPf(gDebug["db11"], "contractName [%s] eventName [%s], %s\n", contractName, eventName, godebug.LF())
-		godebug.DbPf(gDebug["db11"], "Found contract [before overload check], %s, %s\n", contractName, godebug.LF())
+		dbgo.DbPf(gDebug["db11"], "contractName [%s] eventName [%s], %s\n", contractName, eventName, dbgo.LF())
+		dbgo.DbPf(gDebug["db11"], "Found contract [before overload check], %s, %s\n", contractName, dbgo.LF())
 		ABIraw := ABIx.RawABI
 
 		contractAddress, err := gCfg.GetContractAddress(contractName)
@@ -76,7 +76,7 @@ func doWatch(contractName, eventName string) (err error) {
 		/* Contract - parse into the go-eth format */
 		_, parsedABI, err := Bind2Contract(ABIraw, contractAddress, gCfg.conn, gCfg.conn, gCfg.conn) // keep just the parsedABI
 		if err != nil {
-			fmt.Printf("Error on Bind2Contract: %s, %s\n", err, godebug.LF())
+			fmt.Printf("Error on Bind2Contract: %s, %s\n", err, dbgo.LF())
 			return err
 		}
 
@@ -84,12 +84,12 @@ func doWatch(contractName, eventName string) (err error) {
 			Addresses: []common.Address{contractAddress},
 		}
 
-		godebug.DbPf(gDebug["db11"], "AT: %s\n", godebug.LF())
+		dbgo.DbPf(gDebug["db11"], "AT: %s\n", dbgo.LF())
 
 		var ch = make(chan types.Log)
 		ctx := context.Background()
 
-		godebug.DbPf(gDebug["db11"], "AT: %s\n", godebug.LF()) // last working line with truffle, "Subscribe: notifications not supported"
+		dbgo.DbPf(gDebug["db11"], "AT: %s\n", dbgo.LF()) // last working line with truffle, "Subscribe: notifications not supported"
 
 		sub, err := gCfg.conn.SubscribeFilterLogs(ctx, query, ch)
 		if err != nil {
@@ -97,7 +97,7 @@ func doWatch(contractName, eventName string) (err error) {
 			return err
 		}
 
-		godebug.DbPf(gDebug["db11"], "AT: %s\n", godebug.LF())
+		dbgo.DbPf(gDebug["db11"], "AT: %s\n", dbgo.LF())
 
 		// list out the current watched events! -- capture current events in list
 		if watching, ok := CurrentWatchMap[CurrentWatchType{ContractName: contractName, EventName: eventName}]; !ok || !watching {
@@ -113,18 +113,18 @@ func doWatch(contractName, eventName string) (err error) {
 
 		go func() {
 			for {
-				godebug.DbPf(gDebug["db11"], "%sWaiting for event at 'select' - AT: %s%s\n", MiscLib.ColorCyan, godebug.LF(), MiscLib.ColorReset)
+				dbgo.DbPf(gDebug["db11"], "%sWaiting for event at 'select' - AT: %s%s\n", MiscLib.ColorCyan, dbgo.LF(), MiscLib.ColorReset)
 				select {
 				case log := <-ch:
 					if len(log.Topics) > 0 {
 						name := gCfg.GetNameForTopic(log.Topics[0].String())
-						godebug.DbPf(gDebug["db18"], "name [%s] eventName [%s], %s\n", name, eventName, godebug.LF())
+						dbgo.DbPf(gDebug["db18"], "name [%s] eventName [%s], %s\n", name, eventName, dbgo.LF())
 						if eventName == "" || name == eventName {
-							fmt.Printf("%sCaught Event Log:%s, %s%s\n", MiscLib.ColorGreen, godebug.LF(), godebug.SVarI(log), MiscLib.ColorReset)
-							godebug.DbPf(gDebug["db15"], "%sAT:%s name ->%s<-%s\n", MiscLib.ColorYellow, godebug.LF(), name, MiscLib.ColorReset)
+							fmt.Printf("%sCaught Event Log:%s, %s%s\n", MiscLib.ColorGreen, dbgo.LF(), dbgo.SVarI(log), MiscLib.ColorReset)
+							dbgo.DbPf(gDebug["db15"], "%sAT:%s name ->%s<-%s\n", MiscLib.ColorYellow, dbgo.LF(), name, MiscLib.ColorReset)
 
 							if event, ok := parsedABI.Events[name]; ok {
-								godebug.DbPf(gDebug["db15"], "%sAT: %s%s\n", MiscLib.ColorCyan, godebug.LF(), MiscLib.ColorReset)
+								dbgo.DbPf(gDebug["db15"], "%sAT: %s%s\n", MiscLib.ColorCyan, dbgo.LF(), MiscLib.ColorReset)
 								arguments := event.Inputs                                 // get the inputs to the event - these will determine the unpack.
 								marshalledValues, err := arguments.UnpackValues(log.Data) // marshalledValues is an array of interface{}
 								if err != nil {
@@ -133,9 +133,9 @@ func doWatch(contractName, eventName string) (err error) {
 									// 1. Output of watch "bytes32" data - display better as a hex string
 									// 0xBBbbBB... for 32 bytes instead of an array of byte.
 									typeModified := ReturnTypeConverter(marshalledValues)
-									fmt.Printf("%sEvent Data: %s%s\n", MiscLib.ColorGreen, godebug.SVarI(typeModified), MiscLib.ColorReset)
-									godebug.DbPf(gDebug["db15ev"], "%sAT: %s %T %s\n", MiscLib.ColorCyan, godebug.LF(), marshalledValues, MiscLib.ColorReset)
-									godebug.DbPf(gDebug["db15ev"], "%sAT: %s %T %s\n", MiscLib.ColorCyan, godebug.LF(), marshalledValues[0], MiscLib.ColorReset)
+									fmt.Printf("%sEvent Data: %s%s\n", MiscLib.ColorGreen, dbgo.SVarI(typeModified), MiscLib.ColorReset)
+									dbgo.DbPf(gDebug["db15ev"], "%sAT: %s %T %s\n", MiscLib.ColorCyan, dbgo.LF(), marshalledValues, MiscLib.ColorReset)
+									dbgo.DbPf(gDebug["db15ev"], "%sAT: %s %T %s\n", MiscLib.ColorCyan, dbgo.LF(), marshalledValues[0], MiscLib.ColorReset)
 									if gDebug["db15ev"] {
 										TypeOfSlice(marshalledValues)
 									}
@@ -144,14 +144,14 @@ func doWatch(contractName, eventName string) (err error) {
 								fmt.Printf("Error failed to lookup event [%s] in ABI\n", name)
 							}
 						} else {
-							godebug.DbPf(gDebug["show.ignored.event"], "%s%s.%s - event ignored; not watched%s\n", MiscLib.ColorYellow, contractName, name, MiscLib.ColorReset)
+							dbgo.DbPf(gDebug["show.ignored.event"], "%s%s.%s - event ignored; not watched%s\n", MiscLib.ColorYellow, contractName, name, MiscLib.ColorReset)
 						}
 					}
 				case err := <-sub.Err():
-					fmt.Printf("AT: %s, error=%s\n", godebug.LF(), err)
+					fmt.Printf("AT: %s, error=%s\n", dbgo.LF(), err)
 					return
 				}
-				godebug.DbPf(gDebug["db11"], "AT: %s\n", godebug.LF())
+				dbgo.DbPf(gDebug["db11"], "AT: %s\n", dbgo.LF())
 			}
 		}()
 

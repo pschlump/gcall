@@ -45,8 +45,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"         //
 	"github.com/pschlump/GCall/bytecode"                //
 	"github.com/pschlump/MiscLib"                       //
+	"github.com/pschlump/dbgo"                          //
 	ethrpcx "github.com/pschlump/ethrpcx"
-	"github.com/pschlump/godebug" //
 	"golang.org/x/crypto/sha3"
 )
 
@@ -182,15 +182,15 @@ func (gCfg *GethInfo) SetTransactOpts() (err error) {
 	// Account with "gas" to spend so that you can call the contract.
 	file, err := os.Open(gCfg.KeyFile) // Read in file
 	if err != nil {
-		err = fmt.Errorf("Failed to open keyfile: %v, %s, %s", err, gCfg.KeyFile, godebug.LF())
+		err = fmt.Errorf("Failed to open keyfile: %v, %s, %s", err, gCfg.KeyFile, dbgo.LF())
 		return
 	}
 
 	// Create a new trasaction call (will mine) for the contract.
 	opts, err := bind.NewTransactor(bufio.NewReader(file), gCfg.KeyFilePassword)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%sFailed to open keyfile: %v, %s, %s\n    This may be due to an invalid password.\n%s", MiscLib.ColorRed, err, gCfg.KeyFile, godebug.LF(), MiscLib.ColorReset)
-		err = fmt.Errorf("Failed to read keyfile: %v, %s, %s", err, gCfg.KeyFile, godebug.LF())
+		fmt.Fprintf(os.Stderr, "%sFailed to open keyfile: %v, %s, %s\n    This may be due to an invalid password.\n%s", MiscLib.ColorRed, err, gCfg.KeyFile, dbgo.LF(), MiscLib.ColorReset)
+		err = fmt.Errorf("Failed to read keyfile: %v, %s, %s", err, gCfg.KeyFile, dbgo.LF())
 		return
 	}
 
@@ -223,7 +223,9 @@ func (gCfg *GethInfo) GetContractAddress(contractName string) (address common.Ad
 }
 
 // -------------------------------------------------------------------------------------------------
+//
 //	if !IsValidMethod(gCfg,methodName) {
+//
 // ContractList        map[string]ContractInfo // Map of Contracts
 func (gCfg *GethInfo) IsValidMethodName(contractName, methodName string) (pos int, rv bool) {
 	pos = -1
@@ -259,7 +261,7 @@ func Bind2Contract(ABI string, address common.Address, caller bind.ContractCalle
 	if err != nil {
 		return nil, nil, err
 	}
-	godebug.DbPf(gDebug["db12"], "Type of parsed = %T, value %s, %s\n", parsed, godebug.SVarI(parsed), godebug.LF())
+	dbgo.DbPf(gDebug["db12"], "Type of parsed = %T, value %s, %s\n", parsed, dbgo.SVarI(parsed), dbgo.LF())
 	return bind.NewBoundContract(address, parsed, caller, transactor, filterer), &parsed, nil
 }
 
@@ -281,58 +283,58 @@ func NewContractMgr(c *bind.BoundContract, gCfg *GethInfo) (rv *ContractMgr) {
 // -------------------------------------------------------------------------------------------------------
 func (ctm *ContractMgr) CallContract(ABI ABIType, contractName, methodName string, params ...interface{}) (result interface{}, vv *types.Transaction, err error) {
 
-	// fmt.Printf("CallContract params=%s\n", godebug.SVar(params))
+	// fmt.Printf("CallContract params=%s\n", dbgo.SVar(params))
 
 	pos, found := ctm.GCfg.IsValidMethodName(contractName, methodName) // xyzzy - need to check for overloaded functions!
 	if !found {
 		err = fmt.Errorf("Error: %s.%s not found\n", contractName, methodName)
 		return
 	}
-	godebug.DbPf(gDebug["db01"], "pos=%d, len of .ABI=%d\n", pos, len(ctm.GCfg.ContractList[contractName].ABI))
-	// fmt.Printf("%sAT: %s After = %d%s\n", MiscLib.ColorYellow, godebug.LF(), len(ctm.GCfg.ContractList[contractName].ABI), MiscLib.ColorReset)
+	dbgo.DbPf(gDebug["db01"], "pos=%d, len of .ABI=%d\n", pos, len(ctm.GCfg.ContractList[contractName].ABI))
+	// fmt.Printf("%sAT: %s After = %d%s\n", MiscLib.ColorYellow, dbgo.LF(), len(ctm.GCfg.ContractList[contractName].ABI), MiscLib.ColorReset)
 	abi := ctm.GCfg.ContractList[contractName].ABI[pos]
 	isConst := abi.Constant
-	godebug.DbPf(gDebug["db01"], "%sAT: %s, %s isConst=%v\n", MiscLib.ColorYellow, godebug.LF(), MiscLib.ColorReset, isConst)
-	godebug.DbPf(gDebug["db01"], "isConst: %v\n", isConst)
+	dbgo.DbPf(gDebug["db01"], "%sAT: %s, %s isConst=%v\n", MiscLib.ColorYellow, dbgo.LF(), MiscLib.ColorReset, isConst)
+	dbgo.DbPf(gDebug["db01"], "isConst: %v\n", isConst)
 	if len(abi.Inputs) != len(params) {
-		fmt.Printf("Error: have %d arguments passed to function needing %d params, %s\n", len(params), len(abi.Inputs), godebug.LF())
+		fmt.Printf("Error: have %d arguments passed to function needing %d params, %s\n", len(params), len(abi.Inputs), dbgo.LF())
 		err = fmt.Errorf("Error: have %d arguments passed to function needing %d params\n", len(params), len(abi.Inputs))
 		return
 	}
 
 	if !isConst {
 
-		godebug.DbPf(gDebug["db01"], "%sAT: %s --- Doing a Transaction -- %s\n", MiscLib.ColorGreen, godebug.LF(), MiscLib.ColorReset)
+		dbgo.DbPf(gDebug["db01"], "%sAT: %s --- Doing a Transaction -- %s\n", MiscLib.ColorGreen, dbgo.LF(), MiscLib.ColorReset)
 
-		godebug.DbPf(gDebug["db1001"], "%sAT: %s --- Doing a Transaction -- call:%s with:%s %s\n", MiscLib.ColorGreen, godebug.LF(), methodName,
-			godebug.SVar(params), MiscLib.ColorReset)
+		dbgo.DbPf(gDebug["db1001"], "%sAT: %s --- Doing a Transaction -- call:%s with:%s %s\n", MiscLib.ColorGreen, dbgo.LF(), methodName,
+			dbgo.SVar(params), MiscLib.ColorReset)
 
 		vv, err = ctm.Transact(ctm.GCfg.TransactOpts, methodName, params...) // var vv *types.Transaction
 		if err != nil {
-			// fmt.Printf("...TransactOpts = %s\n", godebug.SVar(ctm.GCfg.TransactOpts))
+			// fmt.Printf("...TransactOpts = %s\n", dbgo.SVar(ctm.GCfg.TransactOpts))
 			/*
 				- Cause on call to function that takes an "address"
 				   xyzzy000
 				   Error on Contract call to CorpRegToken: abi: cannot use invalid as type array as argument, File: /Users/corwin/go/src/github.com/pschlump/GCall/gcall.go LineNo:1279
 				   Error: abi: cannot use invalid as type array as argument on call to CorpRegToken.transfer params [6048de3601a6c4043deea717d95deac093763e6d 5000]
 			*/
-			fmt.Printf("Error on Contract call to %s: %s, %s\n", contractName, err, godebug.LF())
+			fmt.Printf("Error on Contract call to %s: %s, %s\n", contractName, err, dbgo.LF())
 			return
 		}
 
-		godebug.DbPf(gDebug["db05"], "%sTransact: typeof(vv) = %T, vv = %s, %s%s\n", MiscLib.ColorGreen, vv, godebug.SVarI(vv), godebug.LF(), MiscLib.ColorReset)
-		fmt.Printf("%sTx: %s%s\n", MiscLib.ColorGreen, godebug.SVarI(vv), MiscLib.ColorReset)
+		dbgo.DbPf(gDebug["db05"], "%sTransact: typeof(vv) = %T, vv = %s, %s%s\n", MiscLib.ColorGreen, vv, dbgo.SVarI(vv), dbgo.LF(), MiscLib.ColorReset)
+		fmt.Printf("%sTx: %s%s\n", MiscLib.ColorGreen, dbgo.SVarI(vv), MiscLib.ColorReset)
 		// fmt.Printf("type %T\n", res)
 
 		// xyzzy501
 
 	} else {
 
-		godebug.DbPf(gDebug["db04"], "%sAT: %s --- Doing Constant Call -- %s\n", MiscLib.ColorGreen, godebug.LF(), MiscLib.ColorReset)
-		godebug.DbPf(gDebug["db09"], "ABI: %s, %s\n", godebug.SVarI(ABI), godebug.LF())
+		dbgo.DbPf(gDebug["db04"], "%sAT: %s --- Doing Constant Call -- %s\n", MiscLib.ColorGreen, dbgo.LF(), MiscLib.ColorReset)
+		dbgo.DbPf(gDebug["db09"], "ABI: %s, %s\n", dbgo.SVarI(ABI), dbgo.LF())
 
 		// xyzzy - should this be "abi.Outputs[0].Type" ??? -- See above!  // xyzzy - This only handles the case of 1 return value - error if more than one.
-		godebug.DbPf(gDebug["show-return-type"], "Length %d Type: %s <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n", len(ABI.Outputs), ABI.Outputs[0].Type)
+		dbgo.DbPf(gDebug["show-return-type"], "Length %d Type: %s <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< \n", len(ABI.Outputs), ABI.Outputs[0].Type)
 		var genReturn = func(Type string) (result interface{}) {
 			switch ABI.Outputs[0].Type {
 			case "string":
@@ -370,13 +372,13 @@ func (ctm *ContractMgr) CallContract(ABI ABIType, contractName, methodName strin
 			case "bool":
 				result = new(bool)
 			case "bytes32":
-				// fmt.Printf("%s ********* New/Bad Type (Probably Fatal): %s AT: %s%s\n", MiscLib.ColorRed, ABI.Outputs[0].Type, godebug.LF(), MiscLib.ColorReset)
+				// fmt.Printf("%s ********* New/Bad Type (Probably Fatal): %s AT: %s%s\n", MiscLib.ColorRed, ABI.Outputs[0].Type, dbgo.LF(), MiscLib.ColorReset)
 				result = new([32]byte)
 			case "uint256[]":
-				fmt.Printf("%s ********* New Type - checked: %s AT: %s%s\n", MiscLib.ColorCyan, ABI.Outputs[0].Type, godebug.LF(), MiscLib.ColorReset)
+				fmt.Printf("%s ********* New Type - checked: %s AT: %s%s\n", MiscLib.ColorCyan, ABI.Outputs[0].Type, dbgo.LF(), MiscLib.ColorReset)
 				result = new([]*big.Int)
 			default:
-				fmt.Printf("%sBad Type (Will Be Fatal): ---->>>>%s<<<<---- AT: %s%s\n", MiscLib.ColorRed, ABI.Outputs[0].Type, godebug.LF(), MiscLib.ColorReset)
+				fmt.Printf("%sBad Type (Will Be Fatal): ---->>>>%s<<<<---- AT: %s%s\n", MiscLib.ColorRed, ABI.Outputs[0].Type, dbgo.LF(), MiscLib.ColorReset)
 				result = new(*interface{})
 			}
 			return
@@ -407,7 +409,7 @@ func (ctm *ContractMgr) CallContract(ABI ABIType, contractName, methodName strin
 			   	return *ret, err
 			   }
 			*/
-			fmt.Printf("%sMultiple Outputs ( Won't Work:!!! ): ---->>>>%s<<<<---- AT: %s%s\n", MiscLib.ColorRed, godebug.SVarI(ABI.Outputs), godebug.LF(), MiscLib.ColorReset)
+			fmt.Printf("%sMultiple Outputs ( Won't Work:!!! ): ---->>>>%s<<<<---- AT: %s%s\n", MiscLib.ColorRed, dbgo.SVarI(ABI.Outputs), dbgo.LF(), MiscLib.ColorReset)
 			resultTmp := make([]interface{}, 0, len(ABI.Outputs))
 			for ii := 0; ii < len(ABI.Outputs); ii++ {
 				tmp := genReturn(ABI.Outputs[0].Type)
@@ -415,15 +417,15 @@ func (ctm *ContractMgr) CallContract(ABI ABIType, contractName, methodName strin
 			}
 			result = resultTmp
 		} else {
-			fmt.Printf("%sBad Type (Will Be Fatal): ---->>>>%s<<<<---- AT: %s%s\n", MiscLib.ColorRed, ABI.Outputs[0].Type, godebug.LF(), MiscLib.ColorReset)
+			fmt.Printf("%sBad Type (Will Be Fatal): ---->>>>%s<<<<---- AT: %s%s\n", MiscLib.ColorRed, ABI.Outputs[0].Type, dbgo.LF(), MiscLib.ColorReset)
 			result = new(*interface{})
 		}
 		// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< xyzzyErr1
 		// fmt.Printf("%x CallOpts\n", ctm.GCfg.CallOpts)
 		err = ctm.Call(ctm.GCfg.CallOpts, &result, methodName, params...)
 		if err != nil {
-			fmt.Printf("Error on Contract call to %s: %s, %s !! Imortant: ->%s<- is the type that is not mapped\n", methodName, err, godebug.LF(), ABI.Outputs[0].Type)
-			fmt.Printf("	Error ABI: %s\n", godebug.SVarI(ABI.Outputs))
+			fmt.Printf("Error on Contract call to %s: %s, %s !! Imortant: ->%s<- is the type that is not mapped\n", methodName, err, dbgo.LF(), ABI.Outputs[0].Type)
+			fmt.Printf("	Error ABI: %s\n", dbgo.SVarI(ABI.Outputs))
 			/*
 				Problem if multiple return values then?  what is the type, try []of interface{}.
 
@@ -445,7 +447,7 @@ func (ctm *ContractMgr) CallContract(ABI ABIType, contractName, methodName strin
 			return
 		}
 
-		godebug.DbPf(gDebug["db04"], "Call Returns: ->%s<-\n", godebug.SVar(result))
+		dbgo.DbPf(gDebug["db04"], "Call Returns: ->%s<-\n", dbgo.SVar(result))
 	}
 
 	return
@@ -525,10 +527,10 @@ func (gCfg *GethInfo) GetNameForTopic(aTopic string) (eventName string) {
 	for contractName, it := range gCfg.ContractList {
 		for _, anABI := range it.ABI {
 			if anABI.Type == "event" {
-				godebug.DbPf(gDebug["db18"], "anABI=%s, %s\n", godebug.SVarI(anABI), godebug.LF())
+				dbgo.DbPf(gDebug["db18"], "anABI=%s, %s\n", dbgo.SVarI(anABI), dbgo.LF())
 				eventName = anABI.Name
 				hh := gCfg.GetHashForEvent(contractName, eventName)
-				godebug.DbPf(gDebug["db18"], "checking hash contractName[%s] eventName[%s], hh=%s, AT:%s\n ", contractName, eventName, hh, godebug.LF())
+				dbgo.DbPf(gDebug["db18"], "checking hash contractName[%s] eventName[%s], hh=%s, AT:%s\n ", contractName, eventName, hh, dbgo.LF())
 				if hh == aTopic {
 					return
 				}
@@ -554,7 +556,7 @@ func (gCfg *GethInfo) CurrentContract(contractName string, address string) (rv b
 	binFn = fmt.Sprintf("%s/%s.bin-runtime", gCfg.BinariesInDir, contractName)
 	solcCode, err := ioutil.ReadFile(binFn)
 	if err != nil {
-		fmt.Printf("uable to read %s - to validate binary in Ethereum, %s, %s\n", binFn, err, godebug.LF())
+		fmt.Printf("uable to read %s - to validate binary in Ethereum, %s, %s\n", binFn, err, dbgo.LF())
 		return
 	}
 
@@ -577,16 +579,16 @@ Version: 0.4.21+commit.dfe3193c.Darwin.appleclang
 	ok := bytecode.VerifyCode(contractName, solcVersion, string(solcCode), ethBin[2:])
 	if !ok {
 		fmt.Printf("%sBinary for contrct %s did not match%s\n", MiscLib.ColorYellow, contractName, MiscLib.ColorReset)
-		godebug.DbPf(gDebug["db21"], "ethBin: ->%s<-, bin ->%s<-\n", ethBin[2:], ethBin)
-		godebug.DbPf(gDebug["db21"], "len: ethBin: %d, bin %d\n", len(ethBin[2:]), len(ethBin))
+		dbgo.DbPf(gDebug["db21"], "ethBin: ->%s<-, bin ->%s<-\n", ethBin[2:], ethBin)
+		dbgo.DbPf(gDebug["db21"], "len: ethBin: %d, bin %d\n", len(ethBin[2:]), len(ethBin))
 	}
 	return ok
 }
 
 func (gCfg *GethInfo) CheckAllContractsAreCurrent() {
-	godebug.DbPf(gDebug["db24"], "automatically check contracts are current at this point, %s\n", godebug.LF())
+	dbgo.DbPf(gDebug["db24"], "automatically check contracts are current at this point, %s\n", dbgo.LF())
 	for name, ca := range ContractAddressHash {
-		// fmt.Printf("AT: %s contract %s, %s\n", godebug.LF(), name, godebug.SVar(ca))
+		// fmt.Printf("AT: %s contract %s, %s\n", dbgo.LF(), name, dbgo.SVar(ca))
 		if ca.ContractAddress == "" { // check for missing address - indicates contract not loaded
 			fmt.Printf("%s • %sContract: %s - no address for contract\n", MiscLib.ColorCyan, MiscLib.ColorReset, name)
 		} else {
@@ -605,12 +607,12 @@ func (gCfg *GethInfo) CheckAllContractsAreCurrent() {
 func GetListOfEventsFor(contractName string) (evList []string, err error) {
 	ABIx, ok := gCfg.ContractList[contractName]
 	if !ok {
-		fmt.Printf("Contract [%s] is not defined, defined contracts are: %s, %s\n", contractName, gCfg.ContractNames, godebug.LF())
-		err = fmt.Errorf("Contract [%s] is not defined, defined contracts are: %s, %s\n", contractName, gCfg.ContractNames, godebug.LF())
+		fmt.Printf("Contract [%s] is not defined, defined contracts are: %s, %s\n", contractName, gCfg.ContractNames, dbgo.LF())
+		err = fmt.Errorf("Contract [%s] is not defined, defined contracts are: %s, %s\n", contractName, gCfg.ContractNames, dbgo.LF())
 		return
 	}
 
-	godebug.DbPf(gDebug["db011"], "contractName [%s] %s\n", contractName, godebug.LF())
+	dbgo.DbPf(gDebug["db011"], "contractName [%s] %s\n", contractName, dbgo.LF())
 	ABIraw := ABIx.RawABI
 
 	contractAddress, err := gCfg.GetContractAddress(contractName)
@@ -622,13 +624,13 @@ func GetListOfEventsFor(contractName string) (evList []string, err error) {
 
 	Contract, parsedABI, err := Bind2Contract(ABIraw, contractAddress, gCfg.conn, gCfg.conn, gCfg.conn)
 	if err != nil {
-		fmt.Printf("Error on Bind2Contract: %s, %s\n", err, godebug.LF())
-		err = fmt.Errorf("Error on Bind2Contract: %s, %s\n", err, godebug.LF())
+		fmt.Printf("Error on Bind2Contract: %s, %s\n", err, dbgo.LF())
+		err = fmt.Errorf("Error on Bind2Contract: %s, %s\n", err, dbgo.LF())
 		return
 	}
 	_ = Contract
 
-	godebug.DbPf(gDebug["db011"], "AT: %s\n", godebug.LF())
+	dbgo.DbPf(gDebug["db011"], "AT: %s\n", dbgo.LF())
 
 	for event := range parsedABI.Events {
 		evList = append(evList, event)
@@ -715,7 +717,7 @@ func FetchReceipt(URLToCall, txHash string) (rv string, status int, err error) {
 	}
 
 	if db0101 {
-		fmt.Printf("resp: %s err: %s\n", godebug.SVarI(resp), err)
+		fmt.Printf("resp: %s err: %s\n", dbgo.SVarI(resp), err)
 	}
 
 	defer resp.Body.Close()
@@ -754,7 +756,7 @@ func FetchReceipt(URLToCall, txHash string) (rv string, status int, err error) {
 
 	bodyDecode.Result.StatusInt = int(StatusInt)
 	status = bodyDecode.Result.StatusInt
-	rv = fmt.Sprintf("\n%s\n", godebug.SVarI(bodyDecode))
+	rv = fmt.Sprintf("\n%s\n", dbgo.SVarI(bodyDecode))
 
 	return
 }
@@ -819,7 +821,7 @@ type EthBytes32 [32]uint8
 // MarshalJSON takes a named type of [32]uint8 === bytes32 from the ethereum
 // return and convers it into a single hex string.
 func (ww EthBytes32) MarshalJSON() ([]byte, error) {
-	fmt.Printf("In the MarshalJSON for .GCcall/[32]uint8, %s\n", godebug.LF())
+	fmt.Printf("In the MarshalJSON for .GCcall/[32]uint8, %s\n", dbgo.LF())
 	// return []byte(fmt.Sprintf("\"%x\"", ww)), nil
 	return []byte(`"0x` + hex.EncodeToString(ww[:]) + `"`), nil
 }
@@ -827,7 +829,7 @@ func (ww EthBytes32) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON convers a EthBytes32 ([32]uint8 === bytes32) into a usable return
 // value.   This is really to meat the interface{} specification for JSON.
 func (ww *EthBytes32) UnmarshalJSON(b []byte) error {
-	fmt.Printf("In the UnmarshalJSON for .GCcall/[32]uint8, %s\n", godebug.LF())
+	fmt.Printf("In the UnmarshalJSON for .GCcall/[32]uint8, %s\n", dbgo.LF())
 	// First, deserialize everything into a local data type that matches with data.
 	var objMap string
 	err := json.Unmarshal(b, &objMap)
@@ -853,6 +855,6 @@ func (ww *EthBytes32) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	fmt.Printf("got ->%x<-, %s\n", ww, godebug.LF())
+	fmt.Printf("got ->%x<-, %s\n", ww, dbgo.LF())
 	return nil
 }

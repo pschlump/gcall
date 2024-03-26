@@ -31,7 +31,7 @@ import (
 	"github.com/chzyer/readline" //
 	"github.com/pschlump/GCall/args"
 	"github.com/pschlump/MiscLib"
-	"github.com/pschlump/godebug"
+	"github.com/pschlump/dbgo"
 )
 
 func doCurrent(cmds []string, rl *readline.Instance) {
@@ -43,7 +43,7 @@ func doCurrent(cmds []string, rl *readline.Instance) {
 	if err != nil {
 		aa.Usage("current")
 	} else {
-		godebug.DbPf(gDebug["db19"], "results: %s\n", godebug.SVarI(aa))
+		dbgo.DbPf(gDebug["db19"], "results: %s\n", dbgo.SVarI(aa))
 	}
 
 	// Run make to rebuild any binaries that we need. -------------------------------------------------
@@ -64,7 +64,7 @@ func doCurrent(cmds []string, rl *readline.Instance) {
 
 	if len(aa.Remainder) > 0 {
 		for ii, anArg := range aa.Remainder {
-			godebug.DbPf(gDebug["db24"], "current contract[%s] #%d, %s\n", anArg, ii, godebug.LF())
+			dbgo.DbPf(gDebug["db24"], "current contract[%s] #%d, %s\n", anArg, ii, dbgo.LF())
 			if addr, ok := ContractAddressHash[anArg]; ok {
 				if addr.ContractAddress != "" {
 					cok := gCfg.CurrentContract(anArg, addr.ContractAddress)
